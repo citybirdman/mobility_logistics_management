@@ -1,0 +1,90 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-20 12:07:19.722037",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "shipping_report_section",
+  "update_shipping_info_now",
+  "auto_update_job_trigger",
+  "latest_sync_date",
+  "latest_successful_sync_date",
+  "shipping_report_dropbox_shared_uri_path",
+  "column_break_eeqk",
+  "error_log"
+ ],
+ "fields": [
+  {
+   "description": "Manually fetching shipping information from Shipping Report into Purchase Invoice without need to waiting for auto update",
+   "fieldname": "update_shipping_info_now",
+   "fieldtype": "Button",
+   "label": "Update Shipping Info Now"
+  },
+  {
+   "default": "24",
+   "description": "Interval should be between 1 to 24 Hour (24 is default value)",
+   "fieldname": "auto_update_job_trigger",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Auto-Update Job Trigger",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "latest_sync_date",
+   "fieldtype": "Datetime",
+   "label": "Latest Sync Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "latest_successful_sync_date",
+   "fieldtype": "Datetime",
+   "label": "Latest Successful Sync Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shipping_report_section",
+   "fieldtype": "Section Break",
+   "label": "Shipping Report"
+  },
+  {
+   "fieldname": "column_break_eeqk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "error_log",
+   "fieldtype": "Code",
+   "label": "Error Log",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shipping_report_dropbox_shared_uri_path",
+   "fieldtype": "Data",
+   "label": "Shipping Report - Dropbox Shared URI Path"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-08-20 16:03:06.557030",
+ "modified_by": "Administrator",
+ "module": "Mobility Logistics Management",
+ "name": "Logistics Management Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

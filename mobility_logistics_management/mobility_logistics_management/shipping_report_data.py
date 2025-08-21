@@ -145,13 +145,17 @@ def get_data():
 
 @frappe.whitelist()
 def Update_shipping_report_data():
+    settings = frappe.get_doc("Logistics Management Settings")
     try:
         logs = get_data()
         for log in logs:
             frappe.db.set_value("Purchase Invoice", {"title": log['title']}, log)
+        settings.latest_successful_sync_date = settings.latest_sync_date = frappe.utils.now_datetime()
+        settings.error_log = ""
+        settings.save()
     except Exception as e:
-        frappe.log_error(f"Error in fetching shipping report data.\n {e}")
-        return {
-            'status': 'error'
-        }
+        frappe.log_error(title="Error in fetching shipping report data.", message=f"{e}")
+        settings.latest_sync_date = frappe.utils.now_datetime()
+        settings.error_log = e
+        settings.save()
 # %%

@@ -148,7 +148,12 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
+    "cron": {
+        "*/60 * * * *": [
+            "mobility_logistics_management.mobility_logistics_management.shipping_report_data.Update_shipping_report_data"
+        ]
+    }
 # 	"all": [
 # 		"mobility_logistics_management.tasks.all"
 # 	],
@@ -164,7 +169,7 @@ app_license = "mit"
 # 	"monthly": [
 # 		"mobility_logistics_management.tasks.monthly"
 # 	],
-# }
+}
 
 # Testing
 # -------

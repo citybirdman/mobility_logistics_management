@@ -95,13 +95,24 @@ def get_data():
                 shipping_file.at[idx, new_headers[5]] = best_match
             else:
                 frappe.throw(f"This Forwarder Is Not In The List.\n Please Add.\n {forwarder}")    
-        
+                
+        for index, row in shipping_file.iterrows():
+            if row[new_headers[3]]=='#':
+                shipping_file.at[index, new_headers[3]] = 1
+            else:
+                shipping_file.at[index, new_headers[3]] = 0
+            
+            if row[new_headers[11]]=='#':
+                shipping_file.at[index, new_headers[11]] = 1
+            else:
+                shipping_file.at[index, new_headers[11]] = 0   
+                
         for index ,row in shipping_file.iterrows():
                 if row[new_headers[9]]=='Arrived':
-                    shipping_file.at[index, new_headers[8]] = row[new_headers[9]]
-                    shipping_file.at[index, new_headers[9]] = 1
+                    shipping_file.at[index, new_headers[9]] = row[new_headers[10]]
+                    shipping_file.at[index, new_headers[10]] = 1
                 else:
-                    shipping_file.at[index, new_headers[9]] = 0
+                    shipping_file.at[index, new_headers[10]] = 0
 
 
         for index, row in shipping_file.iterrows():
@@ -120,7 +131,7 @@ def get_data():
                     except (IndexError, AttributeError):
                             shipping_file.at[index, 'Incoterm'] = "CFR"
                             shipping_file.at[index, new_headers[14]] = 0
-        
+       
         shipping_file=shipping_file.rename(columns=new_columns) # type: ignore
 
         return shipping_file.to_dict(orient='records')

@@ -150,7 +150,7 @@ app_license = "mit"
 
 scheduler_events = {
     "cron": {
-        "*/60 * * * *": [
+        "* */24 * * *": [
             "mobility_logistics_management.mobility_logistics_management.shipping_report_data.Update_shipping_report_data"
         ]
     }

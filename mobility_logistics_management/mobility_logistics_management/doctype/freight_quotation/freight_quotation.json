@@ -1,0 +1,142 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-10-26 08:17:36.374690",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "quotation_from",
+  "quotation_from_doctype",
+  "quoted_by",
+  "column_break_cjwn",
+  "valid_from",
+  "valid_to",
+  "section_break_rtyl",
+  "freight_terms",
+  "column_break_llis",
+  "payment_terms",
+  "credit_days",
+  "section_break_dqgv",
+  "details"
+ ],
+ "fields": [
+  {
+   "fieldname": "quotation_from",
+   "fieldtype": "Autocomplete",
+   "in_list_view": 1,
+   "label": "Quotation From",
+   "options": "Shipping Line\nFreight Forwarder\nShipper",
+   "reqd": 1
+  },
+  {
+   "fieldname": "quoted_by",
+   "fieldtype": "Dynamic Link",
+   "label": "Quoted By",
+   "options": "quotation_from_doctype",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:false",
+   "fieldname": "quotation_from_doctype",
+   "fieldtype": "Link",
+   "label": "Quotation From DocType",
+   "link_filters": "[[\"DocType\",\"name\",\"in\",[\"Shipping Line\",\"Freight Forwarder\",\"Shipper\"]]]",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_cjwn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "valid_from",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Valid From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "valid_to",
+   "fieldtype": "Date",
+   "label": "Valid To",
+   "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "LGX-FRQ-.YYYY.-",
+   "read_only": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "section_break_rtyl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "freight_terms",
+   "fieldtype": "Autocomplete",
+   "label": "Freight Terms",
+   "options": "Prepaid\nCollect",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_llis",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_terms",
+   "fieldtype": "Autocomplete",
+   "label": "Payment Terms",
+   "options": "On Shipment\nPost Shipment\nOn Arrival\nPost Arrival",
+   "reqd": 1
+  },
+  {
+   "fieldname": "credit_days",
+   "fieldtype": "Int",
+   "label": "Credit Days",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "section_break_dqgv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Table",
+   "label": "Quotation Detail",
+   "options": "Freight Quotation Detail",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-10-26 12:25:27.182382",
+ "modified_by": "Administrator",
+ "module": "Mobility Logistics Management",
+ "name": "Freight Quotation",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

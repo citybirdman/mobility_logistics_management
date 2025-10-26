@@ -1,30 +1,30 @@
 {
  "actions": [],
- "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:liner",
- "creation": "2025-08-18 16:07:29.797079",
+ "autoname": "field:shipper",
+ "creation": "2025-10-26 08:38:17.455971",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "liner"
+  "shipper"
  ],
  "fields": [
   {
-   "fieldname": "liner",
+   "fieldname": "shipper",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Liner",
+   "label": "Shipper",
    "reqd": 1,
    "unique": 1
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-19 10:29:38.153067",
+ "modified": "2025-10-26 08:40:27.101664",
  "modified_by": "Administrator",
  "module": "Mobility Logistics Management",
- "name": "Shipping Line",
+ "name": "Shipper",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
@@ -39,36 +39,9 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "export": 1,
-   "import": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Purchase Master Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "export": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Purchase User"
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "export": 1,
-   "import": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Purchase Manager",
-   "write": 1
   }
  ],
- "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

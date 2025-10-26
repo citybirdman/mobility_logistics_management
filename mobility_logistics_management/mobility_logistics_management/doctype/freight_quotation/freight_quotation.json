@@ -114,8 +114,13 @@
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-10-26 12:25:27.182382",
+ "links": [
+  {
+   "link_doctype": "Purchase Invoice",
+   "link_fieldname": "freight_quotation"
+  }
+ ],
+ "modified": "2025-10-26 13:06:16.253938",
  "modified_by": "Administrator",
  "module": "Mobility Logistics Management",
  "name": "Freight Quotation",

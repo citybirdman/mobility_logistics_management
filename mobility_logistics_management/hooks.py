@@ -79,6 +79,13 @@ app_license = "mit"
 # 	"filters": "mobility_logistics_management.utils.jinja_filters"
 # }
 
+fixtures = [
+    {
+        "doctype": "Client Script",
+        "filters": [["module" , "in" , ("Mobility Logistics Management" )]]
+    }
+]
+
 # Installation
 # ------------
 

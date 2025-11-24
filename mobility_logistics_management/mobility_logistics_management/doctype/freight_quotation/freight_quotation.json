@@ -95,9 +95,11 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.payment_terms == \"Post Shipment\" || doc.payment_terms == \"Post Arrival\"",
    "fieldname": "credit_days",
    "fieldtype": "Int",
    "label": "Credit Days",
+   "mandatory_depends_on": "eval:doc.payment_terms == \"Post Shipment\" || doc.payment_terms == \"Post Arrival\"",
    "non_negative": 1
   },
   {
@@ -120,7 +122,7 @@
    "link_fieldname": "freight_quotation"
   }
  ],
- "modified": "2025-10-26 13:06:16.253938",
+ "modified": "2025-10-26 14:00:22.637292",
  "modified_by": "Administrator",
  "module": "Mobility Logistics Management",
  "name": "Freight Quotation",

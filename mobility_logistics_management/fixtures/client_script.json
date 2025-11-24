@@ -1,0 +1,13 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Freight Quotation",
+  "enabled": 1,
+  "modified": "2025-11-24 12:46:03.555090",
+  "module": "Mobility Logistics Management",
+  "name": "Freight Quotation-Form",
+  "script": "frappe.ui.form.on(\"Freight Quotation\", {\n\tquotation_from(frm){\n\t    frm.set_value(\"quotation_from_doctype\", frm.doc.quotation_from);\n\t}\n});",
+  "view": "Form"
+ }
+]

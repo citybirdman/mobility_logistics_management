@@ -6,24 +6,23 @@ from rapidfuzz import fuzz, process
 @frappe.whitelist()
 def get_data():
     columns={
-        'Order No.': 'title',
-        'Vol.': 'cntr_vol',
-        'Type': 'cntr_type',
-        'DOCS':'docs_received',
-        'Shipping Line': 'liner',
-        'Forwarder': 'forwarder',
-        'POL': 'pol',
-        'POD': 'pod',
-        'ETD': 'shipping_date',
-        'ETA': 'arrival_date',
-        'ATA': 'arrived',
-        'Return': 'cntr_returned',
-        'F/T': 'free_time',
-        'BOL No.': 'bol_no',
-        'Freight/Cntr': 'freight_per_cntr',
-        'INCOTERM':'incoterm'
+        'order no.': 'title',
+        'vol.': 'cntr_vol',
+        'type': 'cntr_type',
+        'docs':'docs_received',
+        'shipping line': 'liner',
+        'forwarder': 'forwarder',
+        'pol': 'pol',
+        'pod': 'pod',
+        'etd': 'shipping_date',
+        'eta': 'arrival_date',
+        'ata': 'arrived',
+        'return': 'cntr_returned',
+        'f/t': 'free_time',
+        'bol no.': 'bol_no',
+        'freight/cntr': 'freight_per_cntr',
+        'incoterm':'incoterm'
     }
-
     headers=list(columns.keys())
     new_headers=list(columns.values())
     
@@ -32,6 +31,7 @@ def get_data():
         path=link[0]['value']
         shipping_file=pd.read_excel(f'https://www.dropbox.com{path}')
         shipping_file.columns = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]]
+        shipping_file.columns=shipping_file.columns.str.lower()
         shipping_file = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]+1:].reset_index(drop=True)
         master_data=pd.read_excel(f'https://www.dropbox.com{path}',sheet_name='master_data')
         shipping_file=shipping_file[~shipping_file.ETD.isna()].reset_index(drop=True)
@@ -131,7 +131,7 @@ def get_data():
         return shipping_file.to_dict(orient='records')
     
     except Exception as e:
-        frappe.throw(f"Error in processing the shipping data.\n {e}")  
+        frappe.throw(f"Error while processing the shipping data.\n {e}")  
         return {
             'status': 'error'
         }
@@ -148,7 +148,7 @@ def Update_shipping_report_data():
         settings.error_log = ""
         settings.save()
     except Exception as e:
-        frappe.log_error(title="Error in fetching shipping report data.", message=f"{e}")
+        frappe.log_error(title="Error while fetching shipping report data.", message=f"{e}")
         settings.latest_sync_date = frappe.utils.now_datetime()
         settings.error_log = e
         settings.save()

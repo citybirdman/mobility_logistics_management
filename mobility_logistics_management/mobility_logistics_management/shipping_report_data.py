@@ -6,22 +6,22 @@ from rapidfuzz import fuzz, process
 @frappe.whitelist()
 def get_data():
     columns={
-        'order no.': 'title',
-        'vol.': 'cntr_vol',
-        'type': 'cntr_type',
-        'docs':'docs_received',
-        'shipping line': 'liner',
-        'forwarder': 'forwarder',
-        'pol': 'pol',
-        'pod': 'pod',
-        'etd': 'shipping_date',
-        'eta': 'arrival_date',
-        'ata': 'arrived',
-        'return': 'cntr_returned',
-        'f/t': 'free_time',
-        'bol no.': 'bol_no',
-        'freight/cntr': 'freight_per_cntr',
-        'incoterm':'incoterm'
+        'order no.': 'title', # Mandatory
+        'vol.': 'cntr_vol', # 0
+        'type': 'cntr_type', # None
+        'docs':'docs_received', # 0
+        'shipping line': 'liner', # None
+        'forwarder': 'forwarder', # None
+        'pol': 'pol', # None
+        'pod': 'pod', # None
+        'etd': 'shipping_date', # Mandatory
+        'eta': 'arrival_date', # None
+        'ata': 'arrived', # 0
+        'return': 'cntr_returned', # 0
+        'f/t': 'free_time', # 0
+        'bol no.': 'bol_no', # None
+        'freight/cntr': 'freight_per_cntr', # 0
+        'incoterm':'incoterm' # None
     }
     headers=list(columns.keys())
     new_headers=list(columns.values())
@@ -38,12 +38,11 @@ def get_data():
         shipping_file = shipping_file[headers]
         shipping_file=shipping_file.rename(columns=columns) # type: ignore
         master_data=master_data.fillna('') 
-        shipping_file=shipping_file.fillna('') 
     except Exception as e:
         frappe.throw("Shipping Report Dropbox Shared URI Path not set in Company settings.\n {%s}".format(e))
         return {
             'status': 'error'}
-      
+
     try:      
         for idx, row in shipping_file.iterrows():
             port_name = row[new_headers[6]]  # POL column
@@ -127,7 +126,11 @@ def get_data():
                 except (IndexError, AttributeError):
                         shipping_file.at[index, new_headers[14]] = 0
        
-
+        cols = [new_headers[i] for i in [1, 3, 10, 11, 12, 14]]
+        for c in cols:
+            shipping_file[c] = shipping_file[c].fillna(0)
+        shipping_file.replace('', None, inplace=True)
+        
         return shipping_file.to_dict(orient='records')
     
     except Exception as e:

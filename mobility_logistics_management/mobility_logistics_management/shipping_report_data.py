@@ -34,10 +34,11 @@ def get_data():
         shipping_file.columns=shipping_file.columns.str.lower()
         shipping_file = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]+1:].reset_index(drop=True)
         master_data=pd.read_excel(f'https://www.dropbox.com{path}',sheet_name='master_data')
-        shipping_file=shipping_file[~shipping_file.ETD.isna()].reset_index(drop=True)
+        shipping_file=shipping_file[~shipping_file.etd.isna()].reset_index(drop=True)
         shipping_file = shipping_file[headers]
         shipping_file=shipping_file.rename(columns=columns) # type: ignore
         master_data=master_data.fillna('') 
+        shipping_file=shipping_file.fillna('') 
     except Exception as e:
         frappe.throw("Shipping Report Dropbox Shared URI Path not set in Company settings.\n {%s}".format(e))
         return {
@@ -126,10 +127,13 @@ def get_data():
                 except (IndexError, AttributeError):
                         shipping_file.at[index, new_headers[14]] = 0
        
-        cols = [new_headers[i] for i in [1, 3, 10, 11, 12, 14]]
-        for c in cols:
-            shipping_file[c] = shipping_file[c].fillna(0)
-        shipping_file.replace('', None, inplace=True)
+        shipping_file[new_headers[1]]=shipping_file[new_headers[1]].replace('',0) 
+        shipping_file[new_headers[3]]=shipping_file[new_headers[3]].replace('',0) 
+        shipping_file[new_headers[10]]=shipping_file[new_headers[10]].replace('',0) 
+        shipping_file[new_headers[11]]=shipping_file[new_headers[11]].replace('',0) 
+        shipping_file[new_headers[12]]=shipping_file[new_headers[12]].replace('',0) 
+        shipping_file[new_headers[14]]=shipping_file[new_headers[14]].replace('',0) 
+        shipping_file.replace('',None,inplace=True)
         
         return shipping_file.to_dict(orient='records')
     

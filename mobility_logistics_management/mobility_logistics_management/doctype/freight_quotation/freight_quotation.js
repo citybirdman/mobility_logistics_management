@@ -7,10 +7,10 @@ frappe.ui.form.on("Freight Quotation", {
             frm.set_value('quotation_from_doctype', frm.doc.quotation_from)
 	},
     freight_terms: function(frm) {
-            let terms = {
-                    Prepaid: ["On Shipment", "Post Shipment"],
-                    Collect: ["On Arrival", "Post Arrival"]
-            }
-            frm.fields_dict.payment_terms.set_data(terms[frm.doc.freight_terms] || []);
+        let terms = {
+                Prepaid: ["On Shipment", "Post Shipment"],
+                Collect: ["On Arrival", "Post Arrival"]
+        }
+        frm.fields_dict.payment_terms.set_data(terms[frm.doc.freight_terms] || []);
     }
 });

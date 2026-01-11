@@ -20,18 +20,19 @@ def get_data():
         'Return': 'cntr_returned',
         'F/T': 'free_time',
         'BOL No.': 'bol_no',
-        'Freight/Cntr': 'freight_per_cntr'
+        'Freight/Cntr': 'freight_per_cntr',
+        'INCOTERM':'incoterm'
     }
-    new_columns={        
-        'Incoterm': 'incoterm'}
+
     headers=list(columns.keys())
     new_headers=list(columns.values())
     
     try: 
         link=frappe.db.sql("SELECT value FROM `tabSingles` WHERE doctype = 'Logistics Management Settings' AND field = 'shipping_report_dropbox_shared_uri_path'", as_dict=True)
         path=link[0]['value']
-
-        shipping_file=pd.read_excel(f'https://www.dropbox.com{path}',header=4)
+        shipping_file=pd.read_excel(f'https://www.dropbox.com{path}')
+        shipping_file.columns = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]]
+        shipping_file = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]+1:].reset_index(drop=True)
         master_data=pd.read_excel(f'https://www.dropbox.com{path}',sheet_name='master_data')
         shipping_file=shipping_file[~shipping_file.ETD.isna()].reset_index(drop=True)
         shipping_file = shipping_file[headers]
@@ -117,22 +118,15 @@ def get_data():
 
         for index, row in shipping_file.iterrows():
                 cell = row[new_headers[14]]
-                if isinstance(cell, int):
-                    shipping_file.at[index, 'Incoterm'] ='FOB' 
-                else:
-                    try:
-                        value_in_parens = cell.split('(')[1].split(')')[0]
-                        if value_in_parens.isdigit():
-                            shipping_file.at[index, 'Incoterm'] = "CFR"
-                            shipping_file.at[index, new_headers[14]] = value_in_parens
-                        else:
-                            shipping_file.at[index, 'Incoterm'] = "CFR"
-                            shipping_file.at[index, new_headers[14]] = 0
-                    except (IndexError, AttributeError):
-                            shipping_file.at[index, 'Incoterm'] = "CFR"
-                            shipping_file.at[index, new_headers[14]] = 0
+                try:
+                    value_in_parens = cell.split('(')[1].split(')')[0]
+                    if value_in_parens.isdigit():
+                        shipping_file.at[index, new_headers[14]] = value_in_parens
+                    else:
+                        shipping_file.at[index, new_headers[14]] = 0
+                except (IndexError, AttributeError):
+                        shipping_file.at[index, new_headers[14]] = 0
        
-        shipping_file=shipping_file.rename(columns=new_columns) # type: ignore
 
         return shipping_file.to_dict(orient='records')
     

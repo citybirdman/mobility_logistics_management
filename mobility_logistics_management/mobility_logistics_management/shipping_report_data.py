@@ -62,7 +62,7 @@ def get_data():
                 shipping_file.at[idx, new_headers[6]] = best_match
                 # data1.at[idx, 'fuzzy%'] = best_ratio
             else:
-                frappe.throw(f"This Port Is Not In The List.\n Please Add.\n {port_name}")  
+                frappe.throw(f"This port <b>{port_name}</b> does not exist in Port of Loading Master. Please add it accordingly.")
                        
         for idx, row in shipping_file.iterrows():
             shipping_line = row[new_headers[4]] # Shipping Line column
@@ -79,7 +79,7 @@ def get_data():
                 shipping_file.at[idx, new_headers[4]] = best_match
                 # shipping_file.at[idx, 'fuzzy%'] = best_ratio
             else:
-                frappe.throw(f"This Shipping Line Is Not In The List.\n Please Add.\n {shipping_line}")
+                frappe.throw(f"This liner <b>{shipping_line}</b> does not exist in Shipping Line Master. Please add it accordingly.")
         
         for idx, row in shipping_file.iterrows():
             forwarder = row[new_headers[5]] # Forwarder column
@@ -95,7 +95,7 @@ def get_data():
             if best_ratio > 70:  
                 shipping_file.at[idx, new_headers[5]] = best_match
             else:
-                frappe.throw(f"This Forwarder Is Not In The List.\n Please Add.\n {forwarder}")    
+                frappe.throw(f"This forwarder <b>{forwarder}</b> does not exist in Freight Forwarder Master. Please add it accordingly.")    
                 
         for index, row in shipping_file.iterrows():
             if row[new_headers[3]]=='#':

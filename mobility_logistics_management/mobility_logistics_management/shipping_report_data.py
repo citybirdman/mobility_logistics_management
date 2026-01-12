@@ -34,7 +34,9 @@ def get_data():
         shipping_file.columns=shipping_file.columns.str.lower()
         shipping_file = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]+1:].reset_index(drop=True)
         master_data=pd.read_excel(f'https://www.dropbox.com{path}',sheet_name='master_data')
-        shipping_file=shipping_file[~shipping_file.etd.isna()].reset_index(drop=True)
+        shipping_file.etd=pd.to_datetime(shipping_file.etd,errors='coerce').dt.date
+        shipping_file=shipping_file[shipping_file.etd>=pd.to_datetime('2000-01-01').date()]
+        shipping_file=shipping_file[~shipping_file.etd.isna()].reset_index(drop=True)        
         shipping_file = shipping_file[headers]
         shipping_file=shipping_file.rename(columns=columns) # type: ignore
         master_data=master_data.fillna('') 

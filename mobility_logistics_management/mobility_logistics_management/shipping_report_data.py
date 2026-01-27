@@ -30,7 +30,7 @@ def get_data():
     try: 
         link=frappe.db.sql("SELECT value FROM `tabSingles` WHERE doctype = 'Logistics Management Settings' AND field = 'shipping_report_dropbox_shared_uri_path'", as_dict=True)
         path=link[0]['value']
-        shipping_file=pd.read_excel(f'https://www.dropbox.comp{path}')
+        shipping_file=pd.read_excel(f'https://www.dropbox.com{path}')
         shipping_file.columns = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]]
         shipping_file.columns=shipping_file.columns.str.lower()
         shipping_file = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]+1:].reset_index(drop=True)
@@ -44,7 +44,6 @@ def get_data():
         shipping_file=shipping_file.fillna('') 
         shipping_file[new_headers[1]]=shipping_file[new_headers[1]].astype(str).str.split('+').apply(lambda x: sum(int(i) for i in x if i.isdigit())).astype('Int16')
     except Exception as e:
-        frappe.throw("Shipping Report Dropbox Shared URI Path not set in Company settings.\n {%s}".format(e))
         return {
             'status': e}
 
@@ -65,10 +64,8 @@ def get_data():
             if best_ratio > 70:  
                 shipping_file.at[idx, new_headers[6]] = best_match
                 # data1.at[idx, 'fuzzy%'] = best_ratio
-            elif best_match is None:
-                 shipping_file.at[idx, new_headers[6]] = None  
             else:
-                frappe.throw(f"This port <b>{port_name}</b> does not exist in Port of Loading Master. Please add it accordingly.")
+                shipping_file.at[idx, new_headers[6]] = None  
         for idx, row in shipping_file.iterrows():
             shipping_line = row[new_headers[4]].strip().replace(' ','-') # Shipping Line column
             best_match = None
@@ -83,10 +80,8 @@ def get_data():
             if best_ratio > 70:  
                 shipping_file.at[idx, new_headers[4]] = best_match
                 # shipping_file.at[idx, 'fuzzy%'] = best_ratio
-            elif shipping_line2 is None:
-                shipping_file.at[idx, new_headers[4]] = None
             else:
-                frappe.throw(f"This shipping line <b>{shipping_line}</b> does not exist in Shipping Line Master. Please add it accordingly.")
+                shipping_file.at[idx, new_headers[4]] = None
         for idx, row in shipping_file.iterrows():
             forwarder = row[new_headers[5]].strip().replace(' ','-') # Forwarder column
             best_match = None
@@ -150,9 +145,8 @@ def get_data():
         return shipping_file.to_dict(orient='records')
     
     except Exception as e:
-        frappe.throw(f"Error while processing the shipping data.\n {e}")  
         return {
-            'status': 'error'
+            'status': f'error{e}'
         }
 
 

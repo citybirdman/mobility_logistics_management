@@ -27,11 +27,11 @@ def get_data():
     new_headers=list(columns.values())
     link=frappe.db.sql("SELECT value FROM `tabSingles` WHERE doctype = 'Logistics Management Settings' AND field = 'shipping_report_dropbox_shared_uri_path'", as_dict=True)
     path=link[0]['value']
-    shipping_file=pd.read_excel(f'https://www.dropbox.com{path}')
+    shipping_file=pd.read_excel(f'https://www.dropbox.com/scl/fi/8opxja4ddlygpqm1dniqp/ALMOMTAZ-SHIPPING-REPORT-2026.xlsx?rlkey=zdupycob4e0ykkdc3j3v24fb2&dl=1')
     shipping_file.columns = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]]
     shipping_file.columns=shipping_file.columns.str.lower()
     shipping_file = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]+1:].reset_index(drop=True)
-    master_data=pd.read_excel(f'https://www.dropbox.com{path}',sheet_name='master_data')
+    master_data=pd.read_excel(f'https://www.dropbox.com/scl/fi/8opxja4ddlygpqm1dniqp/ALMOMTAZ-SHIPPING-REPORT-2026.xlsx?rlkey=zdupycob4e0ykkdc3j3v24fb2&dl=1',sheet_name='master_data')
     shipping_file.etd=pd.to_datetime(shipping_file.etd,errors='coerce').dt.date
     shipping_file=shipping_file[shipping_file.etd>=pd.to_datetime('2000-01-01').date()]
     shipping_file=shipping_file[~shipping_file.etd.isna()].reset_index(drop=True)        
@@ -41,86 +41,87 @@ def get_data():
     shipping_file=shipping_file.fillna('') 
     shipping_file[new_headers[1]]=shipping_file[new_headers[1]].astype(str).str.split('+').apply(lambda x: sum(int(i) for i in x if i.isdigit())).astype('Int16')
     print(master_data.head(20))
-    # for idx, row in shipping_file.iterrows():
-    #     port_name = row[new_headers[6]]  # POL column
-    #     best_match = None
-    #     best_ratio = 0
+    for idx, row in shipping_file.iterrows():
+        port_name = row[new_headers[6]]  # POL column
+        best_match = None
+        best_ratio = 0
         
-    #     for _, row2 in master_data.iterrows():
-    #         port_name2 = row2['pol'].strip().replace(' ','-')
-    #         ratio = fuzz.ratio(port_name.lower().split('/')[0], port_name2.lower().strip().split('-')[0])
+        for _, row2 in master_data.iterrows():
+            port_name2 = row2['pol'].strip().replace(' ','-')
+            ratio = fuzz.ratio(port_name.lower().split('/')[0], port_name2.lower().strip().split('-')[0])
             
-    #         if ratio > best_ratio:  
-    #             best_ratio = ratio
-    #             best_match = port_name2
+            if ratio > best_ratio:  
+                best_ratio = ratio
+                best_match = port_name2
         
-    #     if best_ratio > 70:  
-    #         shipping_file.at[idx, new_headers[6]] = best_match
-    #         # data1.at[idx, 'fuzzy%'] = best_ratio
-    #     else:
-    #         shipping_file.at[idx, new_headers[6]] = None  
-    # for idx, row in shipping_file.iterrows():
-    #     shipping_line = row[new_headers[4]].strip().replace(' ','-') # Shipping Line column
-    #     best_match = None
-    #     best_ratio = 0
-    #     for _, row2 in master_data.iterrows():
-    #         shipping_line2 = row2['liner']
-    #         ratio = fuzz.ratio(shipping_line.lower().split('/')[0], shipping_line2.lower().strip().split('-')[0])
-    #         if ratio > best_ratio:  
-    #             best_ratio = ratio
-    #             best_match = shipping_line2
-    #         print(shipping_line,shipping_line2)
-    #     if best_ratio > 70:  
-    #         shipping_file.at[idx, new_headers[4]] = best_match
-    #         # shipping_file.at[idx, 'fuzzy%'] = best_ratio
-    #     else:
-    #         shipping_file.at[idx, new_headers[4]] = None
-    # for idx, row in shipping_file.iterrows():
-    #     forwarder = row[new_headers[5]].strip().replace(' ','-') # Forwarder column
-    #     best_match = None
-    #     best_ratio = 0
-    #     for _, row2 in master_data.iterrows():
-    #         forwarder2 = row2['forwarder']
-    #         ratio = fuzz.ratio(forwarder.lower().strip().split('/')[0], forwarder2.lower().strip().split('-')[0])
-    #         if ratio > best_ratio:  
-    #             best_ratio = ratio
-    #             best_match = forwarder2
+        if best_ratio > 70:  
+            shipping_file.at[idx, new_headers[6]] = best_match
+            # data1.at[idx, 'fuzzy%'] = best_ratio
+        else:
+            shipping_file.at[idx, new_headers[6]] = None  
+    for idx, row in shipping_file.iterrows():
+        shipping_line = row[new_headers[4]].strip().replace(' ','-') # Shipping Line column
+        best_match = None
+        best_ratio = 0
+        for _, row2 in master_data.iterrows():
+            shipping_line2 = row2['liner']
+            ratio = fuzz.ratio(shipping_line.lower().split('/')[0], shipping_line2.lower().strip().split('-')[0])
+            if ratio > best_ratio:  
+                best_ratio = ratio
+                best_match = shipping_line2
+            print(shipping_line,shipping_line2)
+        if best_ratio > 70:  
+            shipping_file.at[idx, new_headers[4]] = best_match
+            # shipping_file.at[idx, 'fuzzy%'] = best_ratio
+        else:
+            shipping_file.at[idx, new_headers[4]] = None
+    for idx, row in shipping_file.iterrows():
+        forwarder = row[new_headers[5]].strip().replace(' ','-') # Forwarder column
+        best_match = None
+        best_ratio = 0
+        for _, row2 in master_data.iterrows():
+            forwarder2 = row2['forwarder']
+            ratio = fuzz.ratio(forwarder.lower().strip().split('/')[0], forwarder2.lower().strip().split('-')[0])
+            if ratio > best_ratio:  
+                best_ratio = ratio
+                best_match = forwarder2
         
-    #     if best_ratio > 70:  
-    #         shipping_file.at[idx, new_headers[5]] = best_match
-    #     else:
-    #         shipping_file.at[idx, new_headers[5]]=None           
+        if best_ratio > 70:  
+            shipping_file.at[idx, new_headers[5]] = best_match
+        else:
+            shipping_file.at[idx, new_headers[5]]=None           
 
 
     for index, row in shipping_file.iterrows():
-        if row[new_headers[3]]=='#':
-            shipping_file.at[index, new_headers[3]] = 1
+        if row['docs_received']=='#':
+            shipping_file.at[index, 'docs_received'] = str(1)
         else:
-            shipping_file.at[index, new_headers[3]] = 0
+            shipping_file.at[index, 'docs_received'] = str(0)
         
-        if row[new_headers[11]]=='#':
-            shipping_file.at[index, new_headers[11]] = 1
+        if row['cntr_returned']=='#':
+            shipping_file.at[index, 'cntr_returned'] = str(1)
         else:
-            shipping_file.at[index, new_headers[11]] = 0   
+            shipping_file.at[index, 'cntr_returned'] = str(0)   
             
     for index ,row in shipping_file.iterrows():
-            if row[new_headers[9]]=='Arrived':
-                shipping_file.at[index, new_headers[9]] = row[new_headers[10]]
-                shipping_file.at[index, new_headers[10]] = 1
+            if row['arrival_date']=='Arrived':
+                shipping_file.at[index, 'arrival_date'] = row['arrived']
+                shipping_file.at[index, 'arrived'] = str(1)
             else:
-                shipping_file.at[index, new_headers[10]] = 0
+                shipping_file.at[index, 'arrived'] = str(0)
 
 
     for index, row in shipping_file.iterrows():
-            cell = row[new_headers[14]]
+            cell = row['freight_per_cntr']
+            print(cell)
             try:
                 value_in_parens = cell.split('(')[1].split(')')[0]
                 if value_in_parens.isdigit():
-                    shipping_file.at[index, new_headers[14]] = value_in_parens
+                    shipping_file.at[index, 'freight_per_cntr'] = value_in_parens
                 else:
-                    shipping_file.at[index, new_headers[14]] = 0
+                    shipping_file.at[index, 'freight_per_cntr'] = 0
             except (IndexError, AttributeError):
-                    shipping_file.at[index, new_headers[14]] = 0
+                    shipping_file.at[index, 'freight_per_cntr'] = 0
     
     shipping_file[new_headers[1]]=shipping_file[new_headers[1]].replace('',0) 
     shipping_file[new_headers[3]]=shipping_file[new_headers[3]].replace('',0) 

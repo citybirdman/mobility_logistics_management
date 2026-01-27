@@ -41,10 +41,11 @@ def get_data():
         shipping_file=shipping_file.rename(columns=columns) # type: ignore
         master_data=master_data.fillna('') 
         shipping_file=shipping_file.fillna('') 
+        shipping_file[new_headers[1]]=shipping_file[new_headers[1]].astype(str).str.split('+').apply(lambda x: sum(int(i) for i in x if i.isdigit())).astype('Int16')
     except Exception as e:
         frappe.throw("Shipping Report Dropbox Shared URI Path not set in Company settings.\n {%s}".format(e))
         return {
-            'status': 'error'}
+            'status': e}
 
     try:      
         for idx, row in shipping_file.iterrows():

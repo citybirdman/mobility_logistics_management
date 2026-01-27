@@ -29,11 +29,11 @@ def get_data():
     try: 
         link=frappe.db.sql("SELECT value FROM `tabSingles` WHERE doctype = 'Logistics Management Settings' AND field = 'shipping_report_dropbox_shared_uri_path'", as_dict=True)
         path=link[0]['value']
-        shipping_file=pd.read_excel(f'https://www.dropbox.com{path}')
+        shipping_file=pd.read_excel(f'https://www.dropbox.com/scl/fi/8opxja4ddlygpqm1dniqp/ALMOMTAZ-SHIPPING-REPORT-2026.xlsx?rlkey=zdupycob4e0ykkdc3j3v24fb2&dl=1')
         shipping_file.columns = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]]
         shipping_file.columns=shipping_file.columns.str.lower()
         shipping_file = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]+1:].reset_index(drop=True)
-        master_data=pd.read_excel(f'https://www.dropbox.com{path}',sheet_name='master_data')
+        master_data=pd.read_excel(f'https://www.dropbox.com/scl/fi/8opxja4ddlygpqm1dniqp/ALMOMTAZ-SHIPPING-REPORT-2026.xlsx?rlkey=zdupycob4e0ykkdc3j3v24fb2&dl=1',sheet_name='master_data')
         shipping_file.etd=pd.to_datetime(shipping_file.etd,errors='coerce').dt.date
         shipping_file=shipping_file[shipping_file.etd>=pd.to_datetime('2000-01-01').date()]
         shipping_file=shipping_file[~shipping_file.etd.isna()].reset_index(drop=True)        
@@ -54,8 +54,8 @@ def get_data():
             best_ratio = 0
             
             for _, row2 in master_data.iterrows():
-                port_name2 = row2['pol'] 
-                ratio = fuzz.ratio(port_name.lower().strip().split('-')[0], port_name2.lower().strip().split('-')[0])
+                port_name2 = row2['pol'].strip().replace(' ','-')
+                ratio = fuzz.ratio(port_name.lower().split('/')[0], port_name2.lower().strip().split('-')[0])
                 
                 if ratio > best_ratio:  
                     best_ratio = ratio
@@ -64,16 +64,17 @@ def get_data():
             if best_ratio > 70:  
                 shipping_file.at[idx, new_headers[6]] = best_match
                 # data1.at[idx, 'fuzzy%'] = best_ratio
+            elif best_match is None:
+                 shipping_file.at[idx, new_headers[6]] = None  
             else:
                 frappe.throw(f"This port <b>{port_name}</b> does not exist in Port of Loading Master. Please add it accordingly.")
-                       
         for idx, row in shipping_file.iterrows():
             shipping_line = row[new_headers[4]] # Shipping Line column
             best_match = None
             best_ratio = 0
             for _, row2 in master_data.iterrows():
-                shipping_line2 = row2['liner']
-                ratio = fuzz.ratio(shipping_line.lower().strip().split('-')[0], shipping_line2.lower().strip().split('-')[0])
+                shipping_line2 = row2['liner'].strip().replace(' ','-')
+                ratio = fuzz.ratio(shipping_line.lower().split('/')[0], shipping_line2.lower().strip().split('-')[0])
                 if ratio > best_ratio:  
                     best_ratio = ratio
                     best_match = shipping_line2
@@ -81,9 +82,10 @@ def get_data():
             if best_ratio > 70:  
                 shipping_file.at[idx, new_headers[4]] = best_match
                 # shipping_file.at[idx, 'fuzzy%'] = best_ratio
+            elif shipping_line2 is None:
+                shipping_file.at[idx, new_headers[4]] = None
             else:
-                frappe.throw(f"This liner <b>{shipping_line}</b> does not exist in Shipping Line Master. Please add it accordingly.")
-        
+                frappe.throw(f"This shipping line <b>{shipping_line}</b> does not exist in Shipping Line Master. Please add it accordingly.")
         for idx, row in shipping_file.iterrows():
             forwarder = row[new_headers[5]] # Forwarder column
             best_match = None
@@ -98,8 +100,9 @@ def get_data():
             if best_ratio > 70:  
                 shipping_file.at[idx, new_headers[5]] = best_match
             else:
-                frappe.throw(f"This forwarder <b>{forwarder}</b> does not exist in Freight Forwarder Master. Please add it accordingly.")    
-                
+                shipping_file.at[idx, new_headers[5]]=None           
+
+
         for index, row in shipping_file.iterrows():
             if row[new_headers[3]]=='#':
                 shipping_file.at[index, new_headers[3]] = 1

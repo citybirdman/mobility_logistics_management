@@ -87,9 +87,9 @@ def get_data():
                 best_match = forwarder2
         
         if best_ratio > 70:  
-            shipping_file.at[idx, new_headers[5]] = best_match
+            shipping_file.at[idx, 'forwarder'] = best_match
         else:
-            shipping_file.at[idx, new_headers[5]]=None           
+            shipping_file.at[idx, 'forwarder']=None           
 
 
     for index, row in shipping_file.iterrows():
@@ -119,24 +119,24 @@ def get_data():
                 if value_in_parens.isdigit():
                     shipping_file.at[index, 'freight_per_cntr'] = value_in_parens
                 else:
-                    shipping_file.at[index, 'freight_per_cntr'] = 0
+                    shipping_file.at[index, 'freight_per_cntr'] = str(0)
             except (IndexError, AttributeError):
-                    shipping_file.at[index, 'freight_per_cntr'] = 0
+                    shipping_file.at[index, 'freight_per_cntr'] = str(0)
     
-    shipping_file[new_headers[1]]=shipping_file[new_headers[1]].replace('',0) 
-    shipping_file[new_headers[3]]=shipping_file[new_headers[3]].replace('',0) 
-    shipping_file[new_headers[10]]=shipping_file[new_headers[10]].replace('',0) 
-    shipping_file[new_headers[11]]=shipping_file[new_headers[11]].replace('',0) 
-    shipping_file[new_headers[12]]=shipping_file[new_headers[12]].replace('',0) 
-    shipping_file[new_headers[14]]=shipping_file[new_headers[14]].replace('',0) 
+    shipping_file.cntr_vol=shipping_file.cntr_vol.replace('',0) 
+    shipping_file.docs_received=shipping_file.docs_received.replace('',0) 
+    shipping_file.arrived=shipping_file.arrived.replace('',0) 
+    shipping_file.cntr_returned=shipping_file.cntr_returned.replace('',0) 
+    shipping_file.free_time=shipping_file.free_time.replace('',0) 
+    shipping_file.freight_per_cntr=shipping_file.freight_per_cntr.replace('',0) 
     shipping_file.replace('',None,inplace=True)
 
-    shipping_file[new_headers[14]]=shipping_file[new_headers[14]].astype(float)
-    shipping_file[new_headers[10]]=shipping_file[new_headers[10]].astype(int)
-    shipping_file[new_headers[11]]=shipping_file[new_headers[11]].astype(int)
-    shipping_file[new_headers[3]]=shipping_file[new_headers[3]].astype(int)
-    shipping_file.arrival_date=pd.to_datetime(shipping_file.arrival_date, errors='coerce').dt.date
-    shipping_file.shipping_date=pd.to_datetime(shipping_file.shipping_date, errors='coerce').dt.date
+    shipping_file.freight_per_cntr=shipping_file.freight_per_cntr.astype(float)
+    shipping_file.arrived=shipping_file.arrived.astype(int)
+    shipping_file.cntr_returned=shipping_file.cntr_returned.astype(int)
+    shipping_file.docs_received=shipping_file.docs_received.astype(int)
+    shipping_file.arrival_date=shipping_file.arrival_date.astype(str).str[:10]
+    shipping_file.shipping_date=shipping_file.shipping_date.astype(str).str[:10]
     print(shipping_file.info())
     print(shipping_file.head())
     return shipping_file.to_dict(orient='records')

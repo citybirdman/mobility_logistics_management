@@ -150,7 +150,9 @@ def Update_shipping_report_data():
     try:
         logs = get_data()
         for log in logs:
+            print(log['title'])
             frappe.db.set_value("Purchase Invoice", {"title": log['title']}, log)
+        print(logs)
         settings.latest_successful_sync_date = settings.latest_sync_date = frappe.utils.now_datetime()
         settings.error_log = ""
         settings.save()

@@ -81,7 +81,7 @@ def get_data():
         best_ratio = 0
         for _, row2 in master_data.iterrows():
             forwarder2 = row2['forwarder']
-            ratio = fuzz.ratio(forwarder.lower().strip()[0], forwarder2.lower().strip()[0])
+            ratio = fuzz.ratio(forwarder.lower().strip().split('-')[0], forwarder2.lower().strip().split('-')[0])
             if ratio > best_ratio:  
                 best_ratio = ratio
                 best_match = forwarder2

@@ -47,7 +47,7 @@ def get_data():
         best_ratio = 0
         
         for _, row2 in master_data.iterrows():
-            port_name2 = row2['pol'].strip().replace(' ','-')
+            port_name2 = row2['pol']
             ratio = fuzz.ratio(port_name.lower().split('/')[0], port_name2.lower().strip().split('-')[0])
             
             if ratio > best_ratio:  
@@ -58,9 +58,9 @@ def get_data():
             shipping_file.at[idx, new_headers[6]] = best_match
             # data1.at[idx, 'fuzzy%'] = best_ratio
         else:
-            shipping_file.at[idx, new_headers[6]] = None  
+            shipping_file.at[idx, new_headers[6]] = ""  
     for idx, row in shipping_file.iterrows():
-        shipping_line = row[new_headers[4]].strip().replace(' ','-') # Shipping Line column
+        shipping_line = row[new_headers[4]] # Shipping Line column
         best_match = None
         best_ratio = 0
         for _, row2 in master_data.iterrows():
@@ -74,14 +74,14 @@ def get_data():
             shipping_file.at[idx, new_headers[4]] = best_match
             # shipping_file.at[idx, 'fuzzy%'] = best_ratio
         else:
-            shipping_file.at[idx, new_headers[4]] = None
+            shipping_file.at[idx, new_headers[4]] = ""
     for idx, row in shipping_file.iterrows():
-        forwarder = row[new_headers[5]].strip().replace(' ','-') # Forwarder column
+        forwarder = row[new_headers[5]] # Forwarder column
         best_match = None
         best_ratio = 0
         for _, row2 in master_data.iterrows():
             forwarder2 = row2['forwarder']
-            ratio = fuzz.ratio(forwarder.lower().strip().split('/')[0], forwarder2.lower().strip().split('-')[0])
+            ratio = fuzz.ratio(forwarder.lower().strip()[0], forwarder2.lower().strip()[0])
             if ratio > best_ratio:  
                 best_ratio = ratio
                 best_match = forwarder2
@@ -89,7 +89,7 @@ def get_data():
         if best_ratio > 70:  
             shipping_file.at[idx, 'forwarder'] = best_match
         else:
-            shipping_file.at[idx, 'forwarder']=None           
+            shipping_file.at[idx, 'forwarder']=""           
 
 
     for index, row in shipping_file.iterrows():
@@ -113,7 +113,6 @@ def get_data():
 
     for index, row in shipping_file.iterrows():
             cell = row['freight_per_cntr']
-            print(cell)
             try:
                 value_in_parens = cell.split('(')[1].split(')')[0]
                 if value_in_parens.isdigit():
@@ -137,8 +136,6 @@ def get_data():
     shipping_file.docs_received=shipping_file.docs_received.astype(int)
     shipping_file.arrival_date=shipping_file.arrival_date.astype(str).str[:10]
     shipping_file.shipping_date=shipping_file.shipping_date.astype(str).str[:10]
-    print(shipping_file.info())
-    print(shipping_file.head())
     return shipping_file.to_dict(orient='records')
 
  

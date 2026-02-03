@@ -27,11 +27,11 @@ def get_data():
     new_headers=list(columns.values())
     link=frappe.db.sql("SELECT value FROM `tabSingles` WHERE doctype = 'Logistics Management Settings' AND field = 'shipping_report_dropbox_shared_uri_path'", as_dict=True)
     path=link[0]['value']
-    shipping_file=pd.read_excel(f'https://www.dropbox.com{path}')
+    shipping_file=pd.read_excel(f'https://www.dropbox.com/scl/fi/8opxja4ddlygpqm1dniqp/ALMOMTAZ-SHIPPING-REPORT-2026.xlsx?rlkey=zdupycob4e0ykkdc3j3v24fb2&dl=1')
     shipping_file.columns = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]]
     shipping_file.columns=shipping_file.columns.str.lower()
     shipping_file = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]+1:].reset_index(drop=True)
-    master_data=pd.read_excel(f'https://www.dropbox.com{path}',sheet_name='master_data')
+    master_data=pd.read_excel(f'https://www.dropbox.com/scl/fi/8opxja4ddlygpqm1dniqp/ALMOMTAZ-SHIPPING-REPORT-2026.xlsx?rlkey=zdupycob4e0ykkdc3j3v24fb2&dl=1',sheet_name='master_data')
     shipping_file.etd=pd.to_datetime(shipping_file.etd,errors='coerce').dt.date
     shipping_file=shipping_file[shipping_file.etd>=pd.to_datetime('2000-01-01').date()]
     shipping_file=shipping_file[~shipping_file.etd.isna()].reset_index(drop=True)        
@@ -47,7 +47,7 @@ def get_data():
         
         for _, row2 in master_data.iterrows():
             port_name2 = row2['pol']
-            ratio = fuzz.ratio(port_name.lower().split('/')[0], port_name2.lower().strip().split('-')[0])
+            ratio = fuzz.ratio(port_name.lower().split('-')[0], port_name2.lower().strip().split('-')[0])
             
             if ratio > best_ratio:  
                 best_ratio = ratio
@@ -57,7 +57,8 @@ def get_data():
             shipping_file.at[idx, new_headers[6]] = best_match
             # data1.at[idx, 'fuzzy%'] = best_ratio
         else:
-            shipping_file.at[idx, new_headers[6]] = None
+            shipping_file.at[idx, new_headers[6]] = pd.NA
+            
     for idx, row in shipping_file.iterrows():
         shipping_line = row[new_headers[4]] # Shipping Line column
         best_match = None
@@ -72,7 +73,7 @@ def get_data():
             shipping_file.at[idx, new_headers[4]] = best_match
             # shipping_file.at[idx, 'fuzzy%'] = best_ratio
         else:
-            shipping_file.at[idx, new_headers[4]] = None
+            shipping_file.at[idx, new_headers[4]] = pd.NA
     for idx, row in shipping_file.iterrows():
         forwarder = row[new_headers[5]] # Forwarder column
         best_match = None
@@ -87,7 +88,7 @@ def get_data():
         if best_ratio > 70:  
             shipping_file.at[idx, 'forwarder'] = best_match
         else:
-            shipping_file.at[idx, 'forwarder']=None         
+            shipping_file.at[idx, 'forwarder']=pd.NA         
 
 
     for index, row in shipping_file.iterrows():
@@ -126,7 +127,6 @@ def get_data():
     shipping_file.cntr_returned=shipping_file.cntr_returned.replace('',0) 
     shipping_file.free_time=shipping_file.free_time.replace('',0) 
     shipping_file.freight_per_cntr=shipping_file.freight_per_cntr.replace('',0) 
-    
 
     shipping_file.freight_per_cntr=shipping_file.freight_per_cntr.astype(float)
     shipping_file.arrived=shipping_file.arrived.astype(int)

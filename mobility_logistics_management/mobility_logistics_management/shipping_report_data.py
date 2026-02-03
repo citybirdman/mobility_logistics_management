@@ -40,7 +40,6 @@ def get_data():
     master_data=master_data.fillna('') 
     shipping_file=shipping_file.fillna('') 
     shipping_file[new_headers[1]]=shipping_file[new_headers[1]].astype(str).str.split('+').apply(lambda x: sum(int(i) for i in x if i.isdigit())).astype('Int16')
-    print(master_data.head(20))
     for idx, row in shipping_file.iterrows():
         port_name = row[new_headers[6]]  # POL column
         best_match = None
@@ -58,7 +57,7 @@ def get_data():
             shipping_file.at[idx, new_headers[6]] = best_match
             # data1.at[idx, 'fuzzy%'] = best_ratio
         else:
-            shipping_file.at[idx, new_headers[6]] = ""  
+            shipping_file.at[idx, new_headers[6]] = " "  
     for idx, row in shipping_file.iterrows():
         shipping_line = row[new_headers[4]] # Shipping Line column
         best_match = None
@@ -69,12 +68,11 @@ def get_data():
             if ratio > best_ratio:  
                 best_ratio = ratio
                 best_match = shipping_line2
-            print(shipping_line,shipping_line2)
         if best_ratio > 70:  
             shipping_file.at[idx, new_headers[4]] = best_match
             # shipping_file.at[idx, 'fuzzy%'] = best_ratio
         else:
-            shipping_file.at[idx, new_headers[4]] = ""
+            shipping_file.at[idx, new_headers[4]] = " "
     for idx, row in shipping_file.iterrows():
         forwarder = row[new_headers[5]] # Forwarder column
         best_match = None
@@ -89,7 +87,7 @@ def get_data():
         if best_ratio > 70:  
             shipping_file.at[idx, 'forwarder'] = best_match
         else:
-            shipping_file.at[idx, 'forwarder']=""           
+            shipping_file.at[idx, 'forwarder']=" "           
 
 
     for index, row in shipping_file.iterrows():
@@ -128,7 +126,7 @@ def get_data():
     shipping_file.cntr_returned=shipping_file.cntr_returned.replace('',0) 
     shipping_file.free_time=shipping_file.free_time.replace('',0) 
     shipping_file.freight_per_cntr=shipping_file.freight_per_cntr.replace('',0) 
-    shipping_file.replace('',None,inplace=True)
+    shipping_file.replace(' ',None,inplace=True)
 
     shipping_file.freight_per_cntr=shipping_file.freight_per_cntr.astype(float)
     shipping_file.arrived=shipping_file.arrived.astype(int)
@@ -147,9 +145,7 @@ def Update_shipping_report_data():
     try:
         logs = get_data()
         for log in logs:
-            print(log['title'])
             frappe.db.set_value("Purchase Invoice", {"title": log['title']}, log)
-        print(logs)
         settings.latest_successful_sync_date = settings.latest_sync_date = frappe.utils.now_datetime()
         settings.error_log = ""
         settings.save()

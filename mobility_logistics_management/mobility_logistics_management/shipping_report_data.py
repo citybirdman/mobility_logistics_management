@@ -1,7 +1,7 @@
 # %%
 import pandas as pd
 import frappe 
-import numpy as np
+# import numpy as np
 from rapidfuzz import fuzz, process
 
 @frappe.whitelist()

@@ -71,7 +71,7 @@ def get_data():
         best_ratio = 0
         for _, row2 in master_data.iterrows():
             shipping_line2 = row2['liner']
-            ratio = fuzz.ratio(shipping_line.lower().split('/')[0], shipping_line2.lower().strip().split('-')[0])
+            ratio = fuzz.ratio(shipping_line.lower().split('-')[0], shipping_line2.lower().strip().split('-')[0])
             if ratio > best_ratio:  
                 best_ratio = ratio
                 best_match = shipping_line2

@@ -27,19 +27,23 @@ def get_data():
     new_headers=list(columns.values())
     link=frappe.db.sql("SELECT value FROM `tabSingles` WHERE doctype = 'Logistics Management Settings' AND field = 'shipping_report_dropbox_shared_uri_path'", as_dict=True)
     path=link[0]['value']
-    shipping_file=pd.read_excel(f'https://www.dropbox.com{path}')
+    shipping_file=pd.read_excel(f'https://www.dropbox.com/scl/fi/1xcqdv4309mvbe0y94p1f/ALMASAR-SHIPPING-REPORT-2026.xlsx?rlkey=tgfdrvcuh5jctnnfh51tixwtx&st=gayez47l&dl=1')
     shipping_file.columns = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]]
     shipping_file.columns=shipping_file.columns.str.lower()
     shipping_file = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]+1:].reset_index(drop=True)
-    master_data=pd.read_excel(f'https://www.dropbox.com{path}',sheet_name='master_data')
+    master_data=pd.read_excel(f'https://www.dropbox.com/scl/fi/1xcqdv4309mvbe0y94p1f/ALMASAR-SHIPPING-REPORT-2026.xlsx?rlkey=tgfdrvcuh5jctnnfh51tixwtx&st=gayez47l&dl=1',sheet_name='master_data')
     shipping_file.etd=pd.to_datetime(shipping_file.etd,errors='coerce').dt.date
     shipping_file=shipping_file[shipping_file.etd>=pd.to_datetime('2000-01-01').date()]
     shipping_file=shipping_file[~shipping_file.etd.isna()].reset_index(drop=True)        
     shipping_file = shipping_file[headers]
     shipping_file=shipping_file.rename(columns=columns) # type: ignore
     master_data=master_data.fillna('') 
-    shipping_file=shipping_file.fillna('') 
+    # shipping_file=shipping_file.fillna("") 
     shipping_file[new_headers[1]]=shipping_file[new_headers[1]].astype(str).str.split('+').apply(lambda x: sum(int(i) for i in x if i.isdigit())).astype('Int16')
+    shipping_file.pol=shipping_file.pol.astype(str)
+    shipping_file.forwarder=shipping_file.forwarder.astype(str)
+    # Normalize blank strings to NaN so fuzzy matching handles empties consistently
+    shipping_file.replace("", pd.NA, inplace=True)
     for idx, row in shipping_file.iterrows():
         port_name = row[new_headers[6]]  # POL column
         best_match = None
@@ -54,11 +58,12 @@ def get_data():
                 best_match = port_name2
         
         if best_ratio > 70:  
-            shipping_file.at[idx, new_headers[6]] = best_match
+            shipping_file.at[idx, 'pol'] = best_match
             # data1.at[idx, 'fuzzy%'] = best_ratio
         else:
-            shipping_file.at[idx, new_headers[6]] = pd.NA
-            
+            # Keep missing matches as NaN for pandas compatibility across versions
+            shipping_file.at[idx, 'pol'] = pd.NA
+
     for idx, row in shipping_file.iterrows():
         shipping_line = row[new_headers[4]] # Shipping Line column
         best_match = None
@@ -70,12 +75,12 @@ def get_data():
                 best_ratio = ratio
                 best_match = shipping_line2
         if best_ratio > 70:  
-            shipping_file.at[idx, new_headers[4]] = best_match
+            shipping_file.at[idx, 'liner'] = best_match
             # shipping_file.at[idx, 'fuzzy%'] = best_ratio
         else:
-            shipping_file.at[idx, new_headers[4]] = pd.NA
+            shipping_file.at[idx, 'liner'] = pd.NA
     for idx, row in shipping_file.iterrows():
-        forwarder = row[new_headers[5]] # Forwarder column
+        forwarder = row['forwarder'] # Forwarder column
         best_match = None
         best_ratio = 0
         for _, row2 in master_data.iterrows():
@@ -88,7 +93,7 @@ def get_data():
         if best_ratio > 70:  
             shipping_file.at[idx, 'forwarder'] = best_match
         else:
-            shipping_file.at[idx, 'forwarder']=pd.NA         
+            shipping_file.at[idx, 'forwarder'] = pd.NA        
 
 
     for index, row in shipping_file.iterrows():
@@ -134,6 +139,11 @@ def get_data():
     shipping_file.docs_received=shipping_file.docs_received.astype(int)
     shipping_file.arrival_date=shipping_file.arrival_date.astype(str).str[:10]
     shipping_file.shipping_date=shipping_file.shipping_date.astype(str).str[:10]
+
+    # Convert all remaining NaN/NaT values to Python None
+    # so the returned dict has None instead of NaN
+    shipping_file = shipping_file.where(pd.notna(shipping_file), None)
+
     return shipping_file.to_dict(orient='records')
 
  

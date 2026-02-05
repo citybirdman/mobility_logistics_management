@@ -96,7 +96,7 @@ def get_data():
         else:
             shipping_file.at[idx, 'forwarder'] = pd.NA        
 
-
+    shipping_file.reset_index(drop=True,inplace=True)
     for index, row in shipping_file.iterrows():
         if row['docs_received']=='#':
             shipping_file.at[index, 'docs_received'] = str(1)
@@ -118,14 +118,45 @@ def get_data():
 
     for index, row in shipping_file.iterrows():
             cell = row['freight_per_cntr']
-            try:
-                value_in_parens = cell.split('(')[1].split(')')[0]
+
+            # Normalize to string for text checks; handle NaN/None safely
+            if pd.isna(cell):
+                shipping_file.at[index, 'freight_per_cntr'] = 0
+                continue
+
+            cell_str = str(cell).strip()
+
+            # Ignore incoterms like CFR / FOB and blanks -> 0
+            if cell_str.upper() in ('CFR', 'FOB', ''):
+                shipping_file.at[index, 'freight_per_cntr'] = str(0)
+                continue
+
+            # If we have a value in parentheses, try to use that
+            if '(' in cell_str and ')' in cell_str:
+                value_in_parens = cell_str.split('(')[1].split(')')[0].strip()
                 if value_in_parens.isdigit():
-                    shipping_file.at[index, 'freight_per_cntr'] = value_in_parens
-                else:
-                    shipping_file.at[index, 'freight_per_cntr'] = str(0)
-            except (IndexError, AttributeError):
-                    shipping_file.at[index, 'freight_per_cntr'] = str(0)
+                    shipping_file.at[index, 'freight_per_cntr'] = int(value_in_parens)
+                    continue
+
+            # Fallback: if the cleaned text is a pure number, use it, else 0
+            numeric_candidate = cell_str.replace(',', '')
+            if numeric_candidate.replace('.', '', 1).isdigit():
+                shipping_file.at[index, 'freight_per_cntr'] = float(numeric_candidate)
+            else:
+                shipping_file.at[index, 'freight_per_cntr'] = str(0)
+      
+            # try:
+            #     if cell.isdigit():
+            #         print(value_in_parens)
+            #         shipping_file.at[index, 'freight_per_cntr'] = int(value_in_parens)
+            #     elif value_in_parens.isdigit():
+            #         value_in_parens = cell.split('(')[1].split(')')[0]
+            #         shipping_file.at[index, 'freight_per_cntr'] = int(value_in_parens)
+            #     else:
+            #         shipping_file.at[index, 'freight_per_cntr'] = str(0)
+            # except Exception as e:
+            #         print(e)
+            #         shipping_file.at[index, 'freight_per_cntr'] = str(0)
     
     shipping_file.cntr_vol=shipping_file.cntr_vol.replace('',0) 
     shipping_file.docs_received=shipping_file.docs_received.replace('',0) 

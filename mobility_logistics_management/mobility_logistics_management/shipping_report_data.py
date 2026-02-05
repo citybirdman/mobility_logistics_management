@@ -45,7 +45,7 @@ def get_data():
     # Normalize blank strings to NaN so fuzzy matching handles empties consistently
     shipping_file.replace("", pd.NA, inplace=True)
     for idx, row in shipping_file.iterrows():
-        port_name = row[new_headers[6]]  # POL column
+        port_name = str(row['pol'])  # POL column
         best_match = None
         best_ratio = 0
         
@@ -65,7 +65,7 @@ def get_data():
             shipping_file.at[idx, 'pol'] = pd.NA
 
     for idx, row in shipping_file.iterrows():
-        shipping_line = row[new_headers[4]] # Shipping Line column
+        shipping_line = str(row['liner']) # Shipping Line column
         best_match = None
         best_ratio = 0
         for _, row2 in master_data.iterrows():
@@ -80,11 +80,11 @@ def get_data():
         else:
             shipping_file.at[idx, 'liner'] = pd.NA
     for idx, row in shipping_file.iterrows():
-        forwarder = row['forwarder'] # Forwarder column
+        forwarder = str(row['forwarder']) # Forwarder column
         best_match = None
         best_ratio = 0
         for _, row2 in master_data.iterrows():
-            forwarder2 = row2['forwarder']
+            forwarder2 = str(row2['forwarder'])
             ratio = fuzz.ratio(forwarder.lower().strip().split('-')[0], forwarder2.lower().strip().split('-')[0])
             if ratio > best_ratio:  
                 best_ratio = ratio
@@ -144,8 +144,8 @@ def get_data():
     # so the returned dict has None instead of NaN
     shipping_file = shipping_file.where(pd.notna(shipping_file), None)
 
-    return shipping_file.to_dict(orient='records')
 
+    return shipping_file.to_dict(orient='records')
  
 
 

@@ -1,3 +1,3 @@
 frappe
 rapidfuzz
-pandas
+pandas ==2.3.2

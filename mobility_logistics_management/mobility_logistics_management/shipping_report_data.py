@@ -1,6 +1,7 @@
 # %%
 import pandas as pd
 import frappe 
+import numpy as np
 from rapidfuzz import fuzz, process
 
 @frappe.whitelist()
@@ -27,11 +28,11 @@ def get_data():
     new_headers=list(columns.values())
     link=frappe.db.sql("SELECT value FROM `tabSingles` WHERE doctype = 'Logistics Management Settings' AND field = 'shipping_report_dropbox_shared_uri_path'", as_dict=True)
     path=link[0]['value']
-    shipping_file=pd.read_excel(f'https://www.dropbox.com{path}')
+    shipping_file=pd.read_excel(f'https://www.dropbox.com/scl/fi/1xcqdv4309mvbe0y94p1f/ALMASAR-SHIPPING-REPORT-2026.xlsx?rlkey=tgfdrvcuh5jctnnfh51tixwtx&st=olzibtdg&dl=1')
     shipping_file.columns = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]]
     shipping_file.columns=shipping_file.columns.str.lower()
     shipping_file = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]+1:].reset_index(drop=True)
-    master_data=pd.read_excel(f'https://www.dropbox.com{path}',sheet_name='master_data')
+    master_data=pd.read_excel(f'https://www.dropbox.com/scl/fi/1xcqdv4309mvbe0y94p1f/ALMASAR-SHIPPING-REPORT-2026.xlsx?rlkey=tgfdrvcuh5jctnnfh51tixwtx&st=olzibtdg&dl=1',sheet_name='master_data')
     shipping_file.etd=pd.to_datetime(shipping_file.etd,errors='coerce').dt.date
     shipping_file=shipping_file[shipping_file.etd>=pd.to_datetime('2000-01-01').date()]
     shipping_file=shipping_file[~shipping_file.etd.isna()].reset_index(drop=True)        
@@ -143,6 +144,7 @@ def get_data():
     # Convert all remaining NaN/NaT values to Python None
     # so the returned dict has None instead of NaN
     shipping_file = shipping_file.where(pd.notna(shipping_file), None)
+    # shipping_file=shipping_file.replace(np.nan,None)
 
 
     return shipping_file.to_dict(orient='records')

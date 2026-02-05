@@ -39,7 +39,6 @@ def get_data():
     shipping_file = shipping_file[headers]
     shipping_file=shipping_file.rename(columns=columns) # type: ignore
     master_data=master_data.fillna('') 
-    # shipping_file=shipping_file.fillna("") 
     shipping_file[new_headers[1]]=shipping_file[new_headers[1]].astype(str).str.split('+').apply(lambda x: sum(int(i) for i in x if i.isdigit())).astype('Int16')
     shipping_file.pol=shipping_file.pol.astype(str)
     shipping_file.forwarder=shipping_file.forwarder.astype(str)
@@ -51,8 +50,8 @@ def get_data():
         best_ratio = 0
         
         for _, row2 in master_data.iterrows():
-            port_name2 = row2['pol']
-            ratio = fuzz.ratio(port_name.lower().split('-')[0], port_name2.lower().strip().split('-')[0])
+            port_name2 = str(row2['pol'])
+            ratio = fuzz.ratio(port_name.lower().split('-')[-1], port_name2.lower().strip().split('-')[-1])
             
             if ratio > best_ratio:  
                 best_ratio = ratio
@@ -63,15 +62,15 @@ def get_data():
             # data1.at[idx, 'fuzzy%'] = best_ratio
         else:
             # Keep missing matches as NaN for pandas compatibility across versions
-            shipping_file.at[idx, 'pol'] = pd.NA
+            shipping_file.at[idx, 'pol'] = None
 
     for idx, row in shipping_file.iterrows():
         shipping_line = str(row['liner']) # Shipping Line column
         best_match = None
         best_ratio = 0
         for _, row2 in master_data.iterrows():
-            shipping_line2 = row2['liner']
-            ratio = fuzz.ratio(shipping_line.lower().split('-')[0], shipping_line2.lower().strip().split('-')[0])
+            shipping_line2 = str(row2['liner'])
+            ratio = fuzz.ratio(shipping_line.lower().split('-')[-1], shipping_line2.lower().strip().split('-')[-1])
             if ratio > best_ratio:  
                 best_ratio = ratio
                 best_match = shipping_line2
@@ -79,14 +78,14 @@ def get_data():
             shipping_file.at[idx, 'liner'] = best_match
             # shipping_file.at[idx, 'fuzzy%'] = best_ratio
         else:
-            shipping_file.at[idx, 'liner'] = pd.NA
+            shipping_file.at[idx, 'liner'] = None
     for idx, row in shipping_file.iterrows():
         forwarder = str(row['forwarder']) # Forwarder column
         best_match = None
         best_ratio = 0
         for _, row2 in master_data.iterrows():
             forwarder2 = str(row2['forwarder'])
-            ratio = fuzz.ratio(forwarder.lower().strip().split('-')[0], forwarder2.lower().strip().split('-')[0])
+            ratio = fuzz.ratio(forwarder.lower().strip().split('-')[-1], forwarder2.lower().strip().split('-')[-1])
             if ratio > best_ratio:  
                 best_ratio = ratio
                 best_match = forwarder2
@@ -94,7 +93,7 @@ def get_data():
         if best_ratio > 70:  
             shipping_file.at[idx, 'forwarder'] = best_match
         else:
-            shipping_file.at[idx, 'forwarder'] = pd.NA        
+            shipping_file.at[idx, 'forwarder'] = None        
 
     shipping_file.reset_index(drop=True,inplace=True)
     for index, row in shipping_file.iterrows():
@@ -145,25 +144,13 @@ def get_data():
             else:
                 shipping_file.at[index, 'freight_per_cntr'] = str(0)
       
-            # try:
-            #     if cell.isdigit():
-            #         print(value_in_parens)
-            #         shipping_file.at[index, 'freight_per_cntr'] = int(value_in_parens)
-            #     elif value_in_parens.isdigit():
-            #         value_in_parens = cell.split('(')[1].split(')')[0]
-            #         shipping_file.at[index, 'freight_per_cntr'] = int(value_in_parens)
-            #     else:
-            #         shipping_file.at[index, 'freight_per_cntr'] = str(0)
-            # except Exception as e:
-            #         print(e)
-            #         shipping_file.at[index, 'freight_per_cntr'] = str(0)
     
-    shipping_file.cntr_vol=shipping_file.cntr_vol.replace('',0) 
-    shipping_file.docs_received=shipping_file.docs_received.replace('',0) 
-    shipping_file.arrived=shipping_file.arrived.replace('',0) 
-    shipping_file.cntr_returned=shipping_file.cntr_returned.replace('',0) 
-    shipping_file.free_time=shipping_file.free_time.replace('',0) 
-    shipping_file.freight_per_cntr=shipping_file.freight_per_cntr.replace('',0) 
+    shipping_file.cntr_vol=shipping_file.cntr_vol.fillna(0)
+    shipping_file.docs_received=shipping_file.docs_received.fillna(0)
+    shipping_file.arrived=shipping_file.arrived.fillna(0)
+    shipping_file.cntr_returned=shipping_file.cntr_returned.fillna(0)
+    shipping_file.free_time=shipping_file.free_time.fillna(0)
+    shipping_file.freight_per_cntr=shipping_file.freight_per_cntr.fillna(0)
 
     shipping_file.freight_per_cntr=shipping_file.freight_per_cntr.astype(float)
     shipping_file.arrived=shipping_file.arrived.astype(int)

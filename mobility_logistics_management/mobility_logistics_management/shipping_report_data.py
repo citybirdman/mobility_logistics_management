@@ -27,18 +27,25 @@ def get_data():
     headers=list(columns.keys())
     new_headers=list(columns.values())
     link=frappe.db.sql("SELECT value FROM `tabSingles` WHERE doctype = 'Logistics Management Settings' AND field = 'shipping_report_dropbox_shared_uri_path'", as_dict=True)
+    pol=frappe.db.sql("SELECT port FROM `tabPort of Loading`", as_dict=True)
+    pol_list = [row["port"] for row in pol]  # this is your list of values
+    pod=frappe.db.sql("SELECT port FROM `tabPort of Discharge`", as_dict=True)
+    pod_list = [row["port"] for row in pod]  # this is your list of values
+    liner=frappe.db.sql("SELECT liner FROM `tabShipping Line`", as_dict=True)
+    liner_list = [row["liner"] for row in liner]
+    forwarder=frappe.db.sql("SELECT forwarder FROM `tabFreight Forwarder`", as_dict=True)
+    forwarder_list = [row["forwarder"] for row in forwarder]
+    print(pod_list)
     path=link[0]['value']
     shipping_file=pd.read_excel(f'https://www.dropbox.com{path}')
     shipping_file.columns = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]]
     shipping_file.columns=shipping_file.columns.str.lower()
     shipping_file = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]+1:].reset_index(drop=True)
-    master_data=pd.read_excel(f'https://www.dropbox.com{path}',sheet_name='master_data')
     shipping_file.etd=pd.to_datetime(shipping_file.etd,errors='coerce').dt.date
     shipping_file=shipping_file[shipping_file.etd>=pd.to_datetime('2000-01-01').date()]
     shipping_file=shipping_file[~shipping_file.etd.isna()].reset_index(drop=True)        
     shipping_file = shipping_file[headers]
     shipping_file=shipping_file.rename(columns=columns) # type: ignore
-    master_data=master_data.fillna('') 
     shipping_file[new_headers[1]]=shipping_file[new_headers[1]].astype(str).str.split('+').apply(lambda x: sum(int(i) for i in x if i.isdigit())).astype('Int16')
     shipping_file.pol=shipping_file.pol.astype(str)
     shipping_file.forwarder=shipping_file.forwarder.astype(str)
@@ -49,8 +56,8 @@ def get_data():
         best_match = None
         best_ratio = 0
         
-        for _, row2 in master_data.iterrows():
-            port_name2 = str(row2['pol'])
+        for row2 in pol_list:
+            port_name2 = str(row2)
             ratio = fuzz.ratio(port_name.lower().split('-')[-1], port_name2.lower().strip().split('-')[-1])
             
             if ratio > best_ratio:  
@@ -62,14 +69,35 @@ def get_data():
             # data1.at[idx, 'fuzzy%'] = best_ratio
         else:
             # Keep missing matches as NaN for pandas compatibility across versions
-            shipping_file.at[idx, 'pol'] = None
+            shipping_file.at[idx, 'pol'] = ""
+
+
+    for idx, row in shipping_file.iterrows():
+        port_name = str(row['pod'])  # POd column
+        best_match = None
+        best_ratio = 0
+        
+        for row2 in pod_list:
+            port_name2 = str(row2)
+            ratio = fuzz.ratio(port_name.lower().split('-')[-1], port_name2.lower().strip().split('-')[-1])
+            
+            if ratio > best_ratio:  
+                best_ratio = ratio
+                best_match = port_name2
+        
+        if best_ratio > 70:  
+            shipping_file.at[idx, 'pod'] = best_match
+            # data1.at[idx, 'fuzzy%'] = best_ratio
+        else:
+            # Keep missing matches as NaN for pandas compatibility across versions
+            shipping_file.at[idx, 'pod'] = ""
 
     for idx, row in shipping_file.iterrows():
         shipping_line = str(row['liner']) # Shipping Line column
         best_match = None
         best_ratio = 0
-        for _, row2 in master_data.iterrows():
-            shipping_line2 = str(row2['liner'])
+        for  row2 in liner_list:
+            shipping_line2 = str(row2)
             ratio = fuzz.ratio(shipping_line.lower().split('-')[-1], shipping_line2.lower().strip().split('-')[-1])
             if ratio > best_ratio:  
                 best_ratio = ratio
@@ -78,13 +106,15 @@ def get_data():
             shipping_file.at[idx, 'liner'] = best_match
             # shipping_file.at[idx, 'fuzzy%'] = best_ratio
         else:
-            shipping_file.at[idx, 'liner'] = None
+            shipping_file.at[idx, 'liner'] = ""
+
+    
     for idx, row in shipping_file.iterrows():
         forwarder = str(row['forwarder']) # Forwarder column
         best_match = None
         best_ratio = 0
-        for _, row2 in master_data.iterrows():
-            forwarder2 = str(row2['forwarder'])
+        for row2 in forwarder_list:
+            forwarder2 = str(row2)
             ratio = fuzz.ratio(forwarder.lower().strip().split('-')[-1], forwarder2.lower().strip().split('-')[-1])
             if ratio > best_ratio:  
                 best_ratio = ratio
@@ -93,7 +123,7 @@ def get_data():
         if best_ratio > 70:  
             shipping_file.at[idx, 'forwarder'] = best_match
         else:
-            shipping_file.at[idx, 'forwarder'] = None        
+            shipping_file.at[idx, 'forwarder'] = ""        
 
     shipping_file.reset_index(drop=True,inplace=True)
     for index, row in shipping_file.iterrows():
@@ -159,10 +189,8 @@ def get_data():
     shipping_file.arrival_date=shipping_file.arrival_date.astype(str).str[:10]
     shipping_file.shipping_date=shipping_file.shipping_date.astype(str).str[:10]
 
-    # Convert all remaining NaN/NaT values to Python None
-    # so the returned dict has None instead of NaN
+
     shipping_file = shipping_file.where(pd.notna(shipping_file), None)
-    # shipping_file=shipping_file.replace(np.nan,None)
 
 
     return shipping_file.to_dict(orient='records')
@@ -184,4 +212,4 @@ def Update_shipping_report_data():
         settings.latest_sync_date = frappe.utils.now_datetime()
         settings.error_log = e
         settings.save()
-# %%
+

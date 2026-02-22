@@ -1,8 +1,20 @@
 # %%
+import math
 import pandas as pd
 import frappe 
 # import numpy as np
 from rapidfuzz import fuzz, process
+
+
+def _sanitize_value_for_db(val):
+    """Convert NaN/None-like values to None so Frappe writes SQL NULL instead of literal 'nan'."""
+    if val is None:
+        return None
+    if isinstance(val, float) and math.isnan(val):
+        return None
+    if isinstance(val, str) and val.strip().lower() == "nan":
+        return None
+    return val
 
 @frappe.whitelist()
 def get_data():
@@ -35,7 +47,6 @@ def get_data():
     liner_list = [row["liner"] for row in liner]
     forwarder=frappe.db.sql("SELECT forwarder FROM `tabFreight Forwarder`", as_dict=True)
     forwarder_list = [row["forwarder"] for row in forwarder]
-    print(pod_list)
     path=link[0]['value']
     shipping_file=pd.read_excel(f'https://www.dropbox.com{path}')
     shipping_file.columns = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]]
@@ -203,7 +214,9 @@ def Update_shipping_report_data():
     try:
         logs = get_data()
         for log in logs:
-            frappe.db.set_value("Purchase Invoice", {"title": log['title']}, log)
+            # Sanitize so float nan / string "nan" become None (SQL NULL), avoiding (1054, "Unknown column 'nan' in 'SET'")
+            sanitized = {k: _sanitize_value_for_db(v) for k, v in log.items()}
+            frappe.db.set_value("Purchase Invoice", {"title": log["title"]}, sanitized)
         settings.latest_successful_sync_date = settings.latest_sync_date = frappe.utils.now_datetime()
         settings.error_log = ""
         settings.save()

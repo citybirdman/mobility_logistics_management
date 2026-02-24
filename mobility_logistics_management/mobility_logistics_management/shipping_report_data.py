@@ -57,9 +57,10 @@ def get_data():
     shipping_file=shipping_file[~shipping_file.etd.isna()].reset_index(drop=True)        
     shipping_file = shipping_file[headers]
     shipping_file=shipping_file.rename(columns=columns) # type: ignore
-    shipping_file[new_headers[1]]=shipping_file[new_headers[1]].astype(str).str.split('+').apply(lambda x: sum(int(i) for i in x if i.isdigit())).astype('Int16')
+    shipping_file[new_headers[1]]=shipping_file[new_headers[1]].fillna('').astype(str).str.split('+').apply(lambda x: sum(int(i) for i in x if i.isdigit())).astype('Int16')
     shipping_file.pol=shipping_file.pol.astype(str)
     shipping_file.forwarder=shipping_file.forwarder.astype(str)
+    
     # Normalize blank strings to NaN so fuzzy matching handles empties consistently
     shipping_file.replace("", pd.NA, inplace=True)
     for idx, row in shipping_file.iterrows():

@@ -119,7 +119,6 @@ def get_data():
             # shipping_file.at[idx, 'fuzzy%'] = best_ratio
         else:
             shipping_file.at[idx, 'liner'] = ""
-
     
     for idx, row in shipping_file.iterrows():
         forwarder = str(row['forwarder']) # Forwarder column
@@ -131,7 +130,6 @@ def get_data():
             if ratio > best_ratio:  
                 best_ratio = ratio
                 best_match = forwarder2
-        
         if best_ratio > 70:  
             shipping_file.at[idx, 'forwarder'] = best_match
         else:
@@ -150,7 +148,7 @@ def get_data():
             shipping_file.at[index, 'cntr_returned'] = str(0)   
             
     for index ,row in shipping_file.iterrows():
-            if row['arrival_date']=='Arrived':
+            if lower(row['arrival_date']) =='arrived':
                 shipping_file.at[index, 'arrival_date'] = row['arrived']
                 shipping_file.at[index, 'arrived'] = str(1)
             else:

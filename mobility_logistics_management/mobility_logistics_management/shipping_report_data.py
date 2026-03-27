@@ -147,12 +147,18 @@ def get_data():
         else:
             shipping_file.at[index, 'cntr_returned'] = str(0)   
             
-    for index ,row in shipping_file.iterrows():
-            if lower(row['arrival_date']) =='arrived':
-                shipping_file.at[index, 'arrival_date'] = row['arrived']
-                shipping_file.at[index, 'arrived'] = str(1)
-            else:
-                shipping_file.at[index, 'arrived'] = str(0)
+    for index, row in shipping_file.iterrows():
+        arrival_date_raw = row['arrival_date']
+        arrival_date_key = ""
+        if not pd.isna(arrival_date_raw):
+            # Normalize for matching like "Arrived" / "arrived"
+            arrival_date_key = str(arrival_date_raw).strip().lower()
+
+        if arrival_date_key == 'arrived':
+            shipping_file.at[index, 'arrival_date'] = row['arrived']
+            shipping_file.at[index, 'arrived'] = str(1)
+        else:
+            shipping_file.at[index, 'arrived'] = str(0)
 
 
     for index, row in shipping_file.iterrows():

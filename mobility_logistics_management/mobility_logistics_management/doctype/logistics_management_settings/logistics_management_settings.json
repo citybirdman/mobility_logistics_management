@@ -10,9 +10,17 @@
   "auto_update_job_trigger",
   "latest_sync_date",
   "latest_successful_sync_date",
-  "shipping_report_dropbox_shared_uri_path",
   "column_break_eeqk",
-  "error_log"
+  "error_log",
+  "dropbox_section",
+  "shipping_report_dropbox_shared_uri_path",
+  "sharepoint_section",
+  "shipping_report_sharepoint_path",
+  "sharepoint_tenant_id",
+  "sharepoint_client_id",
+  "column_break_krso",
+  "sharepoint_client_secret",
+  "sharepoint_drive_id"
  ],
  "fields": [
   {
@@ -62,12 +70,51 @@
    "fieldname": "shipping_report_dropbox_shared_uri_path",
    "fieldtype": "Data",
    "label": "Shipping Report - Dropbox Shared URI Path"
+  },
+  {
+   "fieldname": "dropbox_section",
+   "fieldtype": "Section Break",
+   "label": "Dropbox"
+  },
+  {
+   "fieldname": "sharepoint_section",
+   "fieldtype": "Section Break",
+   "label": "SharePoint"
+  },
+  {
+   "fieldname": "shipping_report_sharepoint_path",
+   "fieldtype": "Data",
+   "label": "Shipping Report SharePoint Path"
+  },
+  {
+   "fieldname": "sharepoint_tenant_id",
+   "fieldtype": "Password",
+   "label": "SharePoint Tenant ID"
+  },
+  {
+   "fieldname": "sharepoint_client_id",
+   "fieldtype": "Password",
+   "label": "SharePoint Client ID"
+  },
+  {
+   "fieldname": "column_break_krso",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sharepoint_client_secret",
+   "fieldtype": "Password",
+   "label": "SharePoint Client Secret"
+  },
+  {
+   "fieldname": "sharepoint_drive_id",
+   "fieldtype": "Password",
+   "label": "SharePoint Drive ID"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-08-20 16:03:06.557030",
+ "modified": "2026-04-08 16:49:17.491677",
  "modified_by": "Administrator",
  "module": "Mobility Logistics Management",
  "name": "Logistics Management Settings",
@@ -84,6 +131,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

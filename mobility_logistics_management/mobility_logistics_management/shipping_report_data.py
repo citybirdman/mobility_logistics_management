@@ -2,8 +2,11 @@
 import math
 import pandas as pd
 import frappe 
+import requests
 # import numpy as np
 from rapidfuzz import fuzz, process
+from io import BytesIO
+
 
 
 def _sanitize_value_for_db(val):
@@ -38,7 +41,36 @@ def get_data():
     }
     headers=list(columns.keys())
     new_headers=list(columns.values())
+
+
+    TENANT_ID = frappe.get_doc('Logistics Management Settings').get_password('sharepoint_tenant_id')
+    CLIENT_ID = frappe.get_doc('Logistics Management Settings').get_password('sharepoint_client_id')
+    CLIENT_SECRET =frappe.get_doc('Logistics Management Settings').get_password('sharepoint_client_secret')
+    DRIVE_ID= frappe.get_doc('Logistics Management Settings').get_password('sharepoint_drive_id') 
+    FILE_PATH= frappe.get_doc('Logistics Management Settings').get('shipping_report_sharepoint_path')
+    token_url = f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/token"
+
+    token_data = {
+        "grant_type": "client_credentials",
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+        "scope": "https://graph.microsoft.com/.default"
+    }
+
+    resp = requests.post(token_url, data=token_data)
+    resp.raise_for_status()   
+    token = resp.json()["access_token"]
+
+    file_url = f"https://graph.microsoft.com/v1.0/drives/{DRIVE_ID}/root:/{FILE_PATH}:/content"
+    token_headers = {"Authorization": f"Bearer {token}"}
+
+    resp = requests.get(file_url, headers=token_headers)
     link=frappe.db.sql("SELECT value FROM `tabSingles` WHERE doctype = 'Logistics Management Settings' AND field = 'shipping_report_dropbox_shared_uri_path'", as_dict=True)
+    if link is not None:
+        path=link[0]['value']
+        shipping_file=pd.read_excel(f"https://www.dropbox.com{path}")
+    else :
+        shipping_file=pd.read_excel(BytesIO(resp.content))
     pol=frappe.db.sql("SELECT port FROM `tabPort of Loading`", as_dict=True)
     pol_list = [row["port"] for row in pol]  # this is your list of values
     pod=frappe.db.sql("SELECT port FROM `tabPort of Discharge`", as_dict=True)
@@ -47,8 +79,7 @@ def get_data():
     liner_list = [row["liner"] for row in liner]
     forwarder=frappe.db.sql("SELECT forwarder FROM `tabFreight Forwarder`", as_dict=True)
     forwarder_list = [row["forwarder"] for row in forwarder]
-    path=link[0]['value']
-    shipping_file=pd.read_excel(f'https://www.dropbox.com{path}')
+    
     shipping_file.columns = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]]
     shipping_file.columns=shipping_file.columns.str.lower()
     shipping_file = shipping_file.iloc[shipping_file[shipping_file.columns[1]].dropna().index[0]+1:].reset_index(drop=True)

@@ -259,6 +259,6 @@ def Update_shipping_report_data():
     except Exception as e:
         frappe.log_error(title="Error while fetching shipping report data.", message=f"{e}")
         settings.latest_sync_date = frappe.utils.now_datetime()
-        settings.error_log = e
+        settings.error_log = frappe.get_traceback()
         settings.save()
 

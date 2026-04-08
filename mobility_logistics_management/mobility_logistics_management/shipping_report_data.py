@@ -66,8 +66,8 @@ def get_data():
 
     resp = requests.get(file_url, headers=token_headers)
     link=frappe.db.sql("SELECT value FROM `tabSingles` WHERE doctype = 'Logistics Management Settings' AND field = 'shipping_report_dropbox_shared_uri_path'", as_dict=True)
-    if link is not None:
-        path=link[0]['value']
+    path=link[0]['value']
+    if path != '':   
         shipping_file=pd.read_excel(f"https://www.dropbox.com{path}")
     else :
         shipping_file=pd.read_excel(BytesIO(resp.content))

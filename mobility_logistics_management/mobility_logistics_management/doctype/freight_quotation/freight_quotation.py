@@ -16,3 +16,8 @@ class FreightQuotation(Document):
 		year = d.year
 		prefix = f"{self.quoted_by}-{month}-{year}-"
 		self.name = make_autoname(prefix.upper() + ".##")
+
+@frappe.whitelist()
+def link_invoices(invoices, name):
+	invoices = frappe.parse_json(invoices)
+	frappe.db.set_value("Purchase Invoice", {"name": ["in", invoices]}, "freight_quotation", name)

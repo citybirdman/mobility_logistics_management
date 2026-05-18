@@ -7,6 +7,9 @@ from frappe.model.document import Document
 
 class LogisticsManagementSettings(Document):
 	def validate(self):
+		old_doc = self.get_doc_before_save()
+		if old_doc and old_doc.auto_update_job_trigger == self.auto_update_job_trigger:
+			return
 		if not 1 <= self.auto_update_job_trigger <= 24:
 			frappe.throw("Auto Update Job Trigger must be between 1 and 24 hours.")
 		method = "mobility_logistics_management.mobility_logistics_management.shipping_report_data.Update_shipping_report_data"
